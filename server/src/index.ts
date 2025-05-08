@@ -1,13 +1,7 @@
 import express, { Request, Response } from 'express';
-import dotenv from 'dotenv';
 import { AuthRegister } from './auth';
-import cors from 'cors';
-
-dotenv.config();
-
 const app = express();
 
-app.use(cors());
 app.use(express.json());
 
 const port = process.env.PORT || 3000;
