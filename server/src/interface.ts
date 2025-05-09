@@ -20,7 +20,7 @@ export type List = {
 export type Item = {
   name: string,
   description: string,
-  dueDate: number,
-  dueMonth: number,
-  dueYear: number,
+  due: Date,
 }
+
+export type EmptyObj = {}

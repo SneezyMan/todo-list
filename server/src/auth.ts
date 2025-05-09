@@ -1,6 +1,6 @@
 import { isEmailValid } from "@hapi/address";
 import { getData } from "./datastore";
-import { User } from "./interface";
+import { User, List } from "./interface";
 
 /**
  * <Register a user with an email, password, first name, and last name,
@@ -51,6 +51,13 @@ export function authRegister(email: string, password: string, nameFirst: string,
     nameLast,
   }
   data.users.push(user);
+
+  const list: List = {
+    userId,
+    completed: [],
+    upcoming: [],
+  }
+  data.lists.push(list);
   
   return { userId: userId };
 }
