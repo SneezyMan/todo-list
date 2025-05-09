@@ -13,7 +13,7 @@ import { User } from "./interface";
  * 
  * @returns {number} userId - number which corresponds to a user
  */
-export function AuthRegister(email: string, password: string, nameFirst: string, nameLast: string
+export function authRegister(email: string, password: string, nameFirst: string, nameLast: string
 ): { userId: number } {
 
   if (!isEmailValid(email)) {
@@ -53,4 +53,26 @@ export function AuthRegister(email: string, password: string, nameFirst: string,
   data.users.push(user);
   
   return { userId: userId };
+}
+
+/**
+ * @param {string} email - email corresponding to user
+ * @param {string} password - password corresponding to user
+ * 
+ * @returns {number} userId - Id corresponding to the user
+ */
+export function authLogin(email: string, password: string): { userId: number } {
+
+  const data = getData();
+
+  const user = data.users.find((user) => user.email === email);
+  if (!user) {
+    throw new Error("User with the email does not exist");
+  }
+
+  if (user.password !== password) {
+    throw new Error("Password does not match");
+  }
+
+  return { userId: user.userId };
 }
