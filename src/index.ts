@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import express from "express";
-import { AuthUserRegister } from "./auth/auth.js";
+import { AuthUserRegister, AuthUserLogin } from "./auth/auth.js";
 import { HttpError } from "./misc.js";
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,21 +17,37 @@ app.put('/user', (req, res) => {
 })
 
 app.post('/user/register', async (req: Request, res: Response) => {
-  let userId: number | undefined;
+  let sessionId: number | undefined;
   try {
-    userId = await AuthUserRegister(req.body.nameFirst,
+    sessionId = await AuthUserRegister(req.body.nameFirst,
       req.body.nameLast, req.body.email, req.body.password);
   } catch (err) {
     if (err instanceof HttpError) {
       console.log('invalid request: POST /user/register');
       return res.status(err.status).json({ error: err.message });
     } else {
-      return res.status(400).json({ error: 'Unknown error' }) ;
+      return res.status(400).json({ error: 'unknown error' }) ;
     }
   }
   console.log('successful request: POST /user/register');
-  return res.status(200).json(userId);
+  return res.status(200).json(sessionId);
 });
+
+app.post('/user/login', async (req: Request, res: Response) => {
+  let sessionId: number | undefined;
+  try {
+    sessionId = await AuthUserLogin(req.body.email, req.body.password);
+  } catch (err) {
+    if (err instanceof HttpError) {
+      console.log('invalid request: POST /user/login');
+      return res.status(err.status).json({ error: err.message });
+    } else {
+      return res.status(400).json({ error: 'unknown error' });
+    }
+  }
+  console.log('successfuel request: POST /user/register');
+  return res.status(200).json(sessionId);
+})
 
 app.listen(port, () => {
   console.log(`Example app listening on http://localhost:${port}`);

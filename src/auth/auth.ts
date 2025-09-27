@@ -15,6 +15,13 @@ export async function AuthUserRegister(nameFirst: string, nameLast: string, emai
       password TEXT
     )
   `);
+  db.exec(`
+    Create Table if NOT EXISTS Sessions (
+    sessionid INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER,
+    createdAt INTEGER
+    )
+  `);
 
   if (!isValidName(nameFirst)) {
     throw new HttpError(400, 'nameFirst is invalid');
@@ -40,5 +47,31 @@ export async function AuthUserRegister(nameFirst: string, nameLast: string, emai
 
   const result = await db.run('INSERT INTO Users (nameFirst, nameLast, email, password)' +
     ' VALUES (?, ?, ?, ?)', [nameFirst, nameLast, email, password]);
-  return result.lastID;
+  const timestamp = Date.now();
+  const session = await db.run('INSERT INTO Sessions(userId, createdAt) VALUES (?, ?)',
+    [result.lastID, timestamp]);
+  return session.lastID;
+}
+
+export async function AuthUserLogin(email: string, password: string) {
+  const db = await openDb();
+  const user = await db.get(`SELECT * FROM Users WHERE email = ?`, [email]);
+  if (!user) {
+    throw new HttpError(401, 'account with email does not exist');
+  }
+
+  if (user.password != password) {
+    throw new HttpError(401, 'password is incorrect');
+  }
+
+  let session = await db.get(`SELECT * FROM Sessions WHERE userId = ?`, [user.userId]);
+  if (session) {
+    throw new HttpError(400, 'user is already logged in');
+  } else {
+    const timestamp = Date.now();
+    session = await db.run('INSERT INTO Sessions(userId, createdAt) VALUES (?, ?)',
+    [user.userId, timestamp]);
+  }
+
+  return session.lastID;
 }
