@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import express from "express";
 import { AuthUserRegister } from "./auth/auth.js";
+import { HttpError } from "./misc.js";
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json());
@@ -21,12 +22,14 @@ app.post('/user/register', async (req: Request, res: Response) => {
     userId = await AuthUserRegister(req.body.nameFirst,
       req.body.nameLast, req.body.email, req.body.password);
   } catch (err) {
-    if (err instanceof Error) {
-      return res.status(400).json({ error: 'ERROR!'});
+    if (err instanceof HttpError) {
+      console.log('invalid request: POST /user/register');
+      return res.status(err.status).json({ error: err.message });
     } else {
-      return res.status(400).json({ error: 'Unknown error'});
+      return res.status(400).json({ error: 'Unknown error' }) ;
     }
   }
+  console.log('successful request: POST /user/register');
   return res.status(200).json(userId);
 });
 
