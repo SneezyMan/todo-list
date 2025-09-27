@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import express from "express";
-import { AuthUserRegister, AuthUserLogin } from "./auth/auth.js";
+import { AuthUserRegister, AuthUserLogin, AuthUserLogout } from "./auth/auth.js";
 import { HttpError } from "./misc.js";
 const app = express();
 const port = process.env.PORT || 3000;
@@ -45,8 +45,24 @@ app.post('/user/login', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'unknown error' });
     }
   }
-  console.log('successfuel request: POST /user/register');
+  console.log('successful request: POST /user/register');
   return res.status(200).json(sessionId);
+})
+
+app.delete('/user/logout', async (req: Request, res: Response) => {
+  let result;
+  try {
+    result = await AuthUserLogout(req.body.sessionId);
+  } catch (err) {
+    if (err instanceof HttpError) {
+      console.log('invalid request: DELETE /user/logout');
+      return res.status(err.status).json({ error: err.message });
+    } else {
+      return res.status(400).json({ error: "unknown error" });
+    }
+  }
+  console.log('successful request DELETE /user/logout');
+  return res.status(200).json(result);
 })
 
 app.listen(port, () => {

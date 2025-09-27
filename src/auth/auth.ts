@@ -17,7 +17,7 @@ export async function AuthUserRegister(nameFirst: string, nameLast: string, emai
   `);
   db.exec(`
     Create Table if NOT EXISTS Sessions (
-    sessionid INTEGER PRIMARY KEY AUTOINCREMENT,
+    sessionId INTEGER PRIMARY KEY AUTOINCREMENT,
     userId INTEGER,
     createdAt INTEGER
     )
@@ -50,9 +50,11 @@ export async function AuthUserRegister(nameFirst: string, nameLast: string, emai
   const timestamp = Date.now();
   const session = await db.run('INSERT INTO Sessions(userId, createdAt) VALUES (?, ?)',
     [result.lastID, timestamp]);
+
   return session.lastID;
 }
 
+// Logs in if email and password match and user isn't logged in
 export async function AuthUserLogin(email: string, password: string) {
   const db = await openDb();
   const user = await db.get(`SELECT * FROM Users WHERE email = ?`, [email]);
@@ -74,4 +76,15 @@ export async function AuthUserLogin(email: string, password: string) {
   }
 
   return session.lastID;
+}
+
+// Logs user out
+export async function AuthUserLogout(sessionId: number) {
+  const db = await openDb();
+  const result = await db.run('DELETE FROM Sessions WHERE sessionId = ?', [sessionId]);
+  if (result.changes === 0) {
+    throw new HttpError(400, 'user is already logged out');
+  }
+
+  return {};
 }
