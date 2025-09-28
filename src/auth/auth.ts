@@ -9,7 +9,7 @@ export async function AuthUserRegister(nameFirst: string, nameLast: string, emai
   db.exec(`
     CREATE TABLE if NOT EXISTS Users (
       userId INTEGER PRIMARY KEY AUTOINCREMENT, 
-      nameFirst String, 
+      nameFirst TEXT, 
       nameLast TEXT, 
       email TEXT, 
       password TEXT
@@ -87,4 +87,12 @@ export async function AuthUserLogout(sessionId: number) {
   }
 
   return {};
+}
+
+// Gets user Details
+export async function AuthUserDetails(sessionId: number) {
+  const db = await openDb();
+  const session = await db.get('SELECT userId FROM Sessions WHERE sessionId = ?', [sessionId]);
+  const user = await db.get('SELECT userId, nameFirst, nameLast, email FROM Users WHERE userId = ?', [session.userId]);
+  return user;
 }

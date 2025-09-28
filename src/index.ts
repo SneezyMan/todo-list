@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import express from "express";
-import { AuthUserRegister, AuthUserLogin, AuthUserLogout } from "./auth/auth.js";
+import { AuthUserRegister, AuthUserLogin, AuthUserLogout, AuthUserDetails } from "./auth/auth.js";
 import { HttpError } from "./misc.js";
 const app = express();
 const port = process.env.PORT || 3000;
@@ -62,6 +62,23 @@ app.delete('/user/logout', async (req: Request, res: Response) => {
     }
   }
   console.log('successful request DELETE /user/logout');
+  return res.status(200).json(result);
+})
+
+app.get('/user/details', async (req: Request, res: Response) => {
+  const sessionId = Number(req.header('sessionId'));
+  let result;
+  try {
+    result = await AuthUserDetails(sessionId);
+  } catch (err) {
+    if (err instanceof HttpError) {
+      console.log('invalid request: GET /user/details');
+      return res.status(err.status).json({ error: err.message });
+    } else {
+      return res.status(400).json({ error: 'unknown error' });
+    }
+  }
+  console.log('successful reqeust GET /user/details');
   return res.status(200).json(result);
 })
 
